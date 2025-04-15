@@ -1,7 +1,7 @@
 import logging
 import streamlit as st
 import ObtainData
-from colorlog import ColoredFormatter  # assume installed
+from colorlog import ColoredFormatter
 
 
 
@@ -25,6 +25,7 @@ if not logger.handlers:
 
 st.title("The Binding of Isaac: Repentance Completion Tracker")
 
+st.warning("Currently only 'rep+persistentgamedata<PROFILE_NUM>.dat' save files have been tested. App and completition marks based on this may not work properly for other versions.")
 uploaded_file = st.file_uploader("Upload your save", type="dat")
 if uploaded_file is not None:
     logger.info(f"File uploaded with filename {uploaded_file.name}")
