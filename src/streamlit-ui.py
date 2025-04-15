@@ -2,6 +2,7 @@ import logging
 import streamlit as st
 import ObtainData
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.Logger("main_logger")
 
 st.title("The Binding of Isaac: Repentance Completion Tracker")
