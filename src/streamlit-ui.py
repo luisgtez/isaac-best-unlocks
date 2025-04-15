@@ -25,7 +25,7 @@ if not logger.handlers:
 
 st.title("The Binding of Isaac: Repentance Completion Tracker")
 
-st.warning("Currently only 'rep+persistentgamedata<PROFILE_NUM>.dat' save files have been tested. App and completition marks based on this may not work properly for other versions.")
+st.warning("Currently only 'rep+persistentgamedata<PROFILE_NUM>.dat' save files have been tested. Completition marks for other versions may not work properly.")
 uploaded_file = st.file_uploader("Upload your save", type="dat")
 if uploaded_file is not None:
     logger.info(f"File uploaded with filename {uploaded_file.name}")
