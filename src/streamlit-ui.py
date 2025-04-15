@@ -1,9 +1,27 @@
 import logging
 import streamlit as st
 import ObtainData
+from colorlog import ColoredFormatter  # assume installed
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.Logger("main_logger")
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = ColoredFormatter(
+        '%(log_color)s%(asctime)s - %(levelname)s - %(message)s',
+        log_colors={
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'bold_red',
+        }
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 st.title("The Binding of Isaac: Repentance Completion Tracker")
 
