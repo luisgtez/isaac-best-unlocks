@@ -51,6 +51,8 @@ This helps you prioritize the best unlocks first.
    - Adding filters to choose between searching only characters, challenges, normal characters or tainted characters
 - Adding random picker based on what completitions are left
    - Adding optional weigthed random picker based on quality of completitions left
+- Add file validation
+- Add an explanation on where to find the save file (either if playing with steam cloud or locally)
 
 ## Credits
 
