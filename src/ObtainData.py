@@ -241,6 +241,12 @@ def unify_results(challenges_df, normal_df, tainted_df):
     )
     all_df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
+    all_df["Nº/Character"] = all_df["Nº/Character"].astype(str)
+    all_df["Name/Mark"] = all_df["Name/Mark"].astype(str)
+    all_df["Quality"] = all_df["Quality"].astype(int)
+    all_df["Item"] = all_df["Item"].astype(str)
+    all_df["Completed"] = all_df["Completed"].astype(bool)
+
     return all_df
 
 
@@ -281,14 +287,5 @@ def run_data_parser(save_data):
         challenges_tierlist_df, normal_unlocks_tierlist_df, tainted_unlocks_tierlist_df
     )
 
+
     return all_df
-
-
-if __name__ == "__main__":
-    with open(
-        r"C:\Program Files (x86)\Steam\userdata\364981890\250900\remote\ab_persistentgamedata1.dat",
-        "rb",
-    ) as f:
-        data = f.read()
-    for i in range(36):
-        print(i, get_checklist_unlocks(data, i))
