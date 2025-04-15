@@ -53,6 +53,8 @@ This helps you prioritize the best unlocks first.
    - Adding optional weigthed random picker based on quality of completitions left
 - Add file validation
 - Add an explanation on where to find the save file (either if playing with steam cloud or locally)
+- Add "manual" support for users that don't want or can't upload the save file
+- Add tier list modifications created by users to change quality of challenges and other unlocks.
 
 ## Credits
 
