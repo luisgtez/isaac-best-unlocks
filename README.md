@@ -47,6 +47,10 @@ This helps you prioritize the best unlocks first.
 
 - Improving visual interface with characters and items images.
 - Adding more filters to visual interface (allow multiple column sorting)
+   - Adding filters over which data to show based on if the challenge/character is unlocked or not
+   - Adding filters to choose between searching only characters, challenges, normal characters or tainted characters
+- Adding random picker based on what completitions are left
+   - Adding optional weigthed random picker based on quality of completitions left
 
 ## Credits
 
