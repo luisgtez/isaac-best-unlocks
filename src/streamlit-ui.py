@@ -33,13 +33,17 @@ if not logger.handlers:
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-st.title("The Binding of Isaac: Repentance Completion Tracker")
+st.title("The Binding of Isaac: Repentance+ Completion Tracker")
 
 st.warning(
-    "Currently only 'rep+persistentgamedata<PROFILE_NUM>.dat' save files have been tested. Completition marks for other versions may not work properly."
+    "Currently only save files from Repentance+ work properly and automatically fill the alredy completed marks in. \n\n" \
+    "While there is no plan to add compatibility with save file from previous DLC for now, a manual mode where one can manually check the completion marks is currently under construction."
 )
+
 uploaded_file = st.file_uploader("Upload your save", type="dat")
 if uploaded_file is not None:
+    if not uploaded_file.name.startswith("rep+"):
+        st.warning("The save file seems to be from other expansion pack that is not Repentance+, completition marks may not properly be automatically checked.")
     logger.info(f"File uploaded with filename {uploaded_file.name}")
     try:
         st.dataframe(ObtainData.run_data_parser(uploaded_file.read()))
