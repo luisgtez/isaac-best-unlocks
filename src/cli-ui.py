@@ -1,4 +1,5 @@
 import argparse
+
 import ObtainData
 
 
@@ -26,14 +27,16 @@ def main():
     # all_df = all_df.sort_values(by="Quality", ascending=False)
 
     # # Sort by quality and completed (show first not completed)
-    all_df = all_df.sort_values(by=["Completed", "Quality"], ascending=[True,False])
+    all_df = all_df.sort_values(by=["Completed", "Quality"], ascending=[True, False])
 
-    print("""
+    print(
+        """
           #######################################################
           # The Binding of Isaac: Repentance Completion Tracker #
           #######################################################
-          """)
-    
+          """
+    )
+
     print("Showing first 20 entries:")
     print("\n")
 

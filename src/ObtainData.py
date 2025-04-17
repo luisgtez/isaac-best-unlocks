@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 # Game data constants
 NORMAL_CHARACTERS_INDEX = [
@@ -128,12 +128,31 @@ def get_challenges(data):
     return challenge_data
 
 
+def check_mark_completion(value):
+    """Check if a mark is completed based on its value."""
+    return COMPLETION_MAP.get(str(value), False)
+
+
+def get_character_indices(characters_list):
+    """Create a dictionary mapping character names to their indices."""
+    return {character: i for i, character in enumerate(characters_list)}
+
+
+def get_mark_indices():
+    """Create a dictionary mapping mark names to their indices."""
+    return {mark: i for i, mark in enumerate(MARKS_ORDER)}
+
+
+def get_character_completion_marks(data, character_name, character_indices):
+    """Get all completion marks for a specific character."""
+    character_index = character_indices[character_name]
+    return get_checklist_unlocks(data, character_index)
+
+
 def process_normal_character_marks(data, tierlist_df):
     """Process completion marks for normal characters."""
-    character_indices = {
-        character: i for i, character in enumerate(NORMAL_CHARACTERS_INDEX)
-    }
-    mark_indices = {mark: i for i, mark in enumerate(MARKS_ORDER)}
+    character_indices = get_character_indices(NORMAL_CHARACTERS_INDEX)
+    mark_indices = get_mark_indices()
     completion_marks = {}
     completion_results = []
 
@@ -145,42 +164,31 @@ def process_normal_character_marks(data, tierlist_df):
         if mark_name == "Ultra Greed":
             mark_name = "Ultra Greedier"
 
-        if mark_name != "All Marks":
-            # Get individual mark completion
-            character_index = character_indices[character_name]
-            mark_index = mark_indices[mark_name]
-
-            if character_name not in completion_marks:
-                completion_marks[character_name] = get_checklist_unlocks(
-                    data, character_index
-                )
-
-            completed = COMPLETION_MAP.get(
-                str(completion_marks[character_name][mark_index]), False
+        # Fetch character marks if not already cached
+        if character_name not in completion_marks:
+            completion_marks[character_name] = get_character_completion_marks(
+                data, character_name, character_indices
             )
-            completion_results.append(completed)
-        else:
+
+        marks = completion_marks[character_name]
+
+        if mark_name == "All Marks":
             # Check if all marks are completed
-            character_index = character_indices[character_name]
-            if character_name not in completion_marks:
-                completion_marks[character_name] = get_checklist_unlocks(
-                    data, character_index
-                )
-
-            all_marks_completed = all(
-                value == 3 for value in completion_marks[character_name]
-            )
+            all_marks_completed = all(value == 3 for value in marks)
             completion_results.append(all_marks_completed)
+        else:
+            # Get individual mark completion
+            mark_index = mark_indices[mark_name]
+            completed = check_mark_completion(marks[mark_index])
+            completion_results.append(completed)
 
     return completion_results
 
 
 def process_tainted_character_marks(data, tierlist_df):
     """Process completion marks for tainted characters."""
-    character_indices = {
-        character: i for i, character in enumerate(TAINTED_CHARACTERS_INDEX)
-    }
-    mark_indices = {mark: i for i, mark in enumerate(MARKS_ORDER)}
+    character_indices = get_character_indices(TAINTED_CHARACTERS_INDEX)
+    mark_indices = get_mark_indices()
     completion_marks = {}
     completion_results = []
 
@@ -188,43 +196,50 @@ def process_tainted_character_marks(data, tierlist_df):
         character_name = row["Character"]
         mark_name = row["Mark"]
 
-        char_index = character_indices[character_name]
+        # Fetch character marks if not already cached
         if character_name not in completion_marks:
-            completion_marks[character_name] = get_checklist_unlocks(data, char_index)
+            completion_marks[character_name] = get_character_completion_marks(
+                data, character_name, character_indices
+            )
 
         marks = completion_marks[character_name]
 
+        # Process special completion conditions
         if mark_name == "Boss Rush & Hush":
-            completed = (
-                marks[MARKS_ORDER.index("Boss Rush")] == 3
-                and marks[MARKS_ORDER.index("Hush")] == 3
-            )
+            completed = check_mark_completion(
+                marks[mark_indices["Boss Rush"]]
+            ) and check_mark_completion(marks[mark_indices["Hush"]])
         elif mark_name == "Isaac, ???, Satan, Lamb":
             completed = (
-                marks[MARKS_ORDER.index("Isaac")] == 3
-                and marks[MARKS_ORDER.index("???")] == 3
-                and marks[MARKS_ORDER.index("Satan")] == 3
-                and marks[MARKS_ORDER.index("The Lamb")] == 3
+                check_mark_completion(marks[mark_indices["Isaac"]])
+                and check_mark_completion(marks[mark_indices["???"]])
+                and check_mark_completion(marks[mark_indices["Satan"]])
+                and check_mark_completion(marks[mark_indices["The Lamb"]])
             )
         else:
             mark_index = mark_indices[mark_name]
-            completed = COMPLETION_MAP.get(
-                str(completion_marks[character_name][mark_index]), False
-            )
+            completed = check_mark_completion(marks[mark_index])
 
         completion_results.append(completed)
 
     return completion_results
 
 
-def unify_results(challenges_df, normal_df, tainted_df):
-    # Unify the results from all dataframes into a single dataframe
-    # Shift to same scale as items unlocks
-    challenges_df.columns = challenges_df.columns.str.strip()
-    normal_df.columns = normal_df.columns.str.strip()
-    tainted_df.columns = tainted_df.columns.str.strip()
-    challenges_df["Reward"] = challenges_df["Reward"] - 1
+def prepare_dataframe(df):
+    """Clean and prepare dataframe columns."""
+    df.columns = df.columns.str.strip()
+    return df
 
+
+def unify_results(challenges_df, normal_df, tainted_df):
+    """Unify the results from all dataframes into a single dataframe."""
+    # Prepare individual dataframes
+    challenges_df = prepare_dataframe(challenges_df)
+    normal_df = prepare_dataframe(normal_df)
+    tainted_df = prepare_dataframe(tainted_df)
+
+    # Adjust scales and add prefixes
+    challenges_df["Reward"] = challenges_df["Reward"] - 1
     tainted_df["Character"] = tainted_df["Character"].apply(lambda x: f"Tainted {x}")
 
     # Concatenate all dataframes
@@ -236,11 +251,14 @@ def unify_results(challenges_df, normal_df, tainted_df):
         ],
         axis=0,
     )
+
+    # Create unified dataframe with consistent column names
     all_df = pd.DataFrame(
         all_data, columns=["Nº/Character", "Name/Mark", "Quality", "Item", "Completed"]
     )
-    all_df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
+    # Clean and standardize data types
+    all_df = all_df.map(lambda x: x.strip() if isinstance(x, str) else x)
     all_df["Nº/Character"] = all_df["Nº/Character"].astype(str)
     all_df["Name/Mark"] = all_df["Name/Mark"].astype(str)
     all_df["Quality"] = all_df["Quality"].astype(int)
@@ -251,6 +269,7 @@ def unify_results(challenges_df, normal_df, tainted_df):
 
 
 def run_data_parser(save_data):
+    """Main function to process save data and return unified results."""
     # File paths
     challenges_tierlist_file = "src/data/challenges_data.csv"
     normal_unlocks_tierlist_file = "src/data/normal_characters_unlocks.csv"
@@ -261,8 +280,6 @@ def run_data_parser(save_data):
     normal_unlocks_tierlist_df = pd.read_csv(normal_unlocks_tierlist_file)
     tainted_unlocks_tierlist_df = pd.read_csv(tainted_unlocks_tierlist_file)
 
-    # Read save file
-
     # Process challenges
     challenges_completed = get_challenges(save_data)
     challenges_tierlist_df["Completed"] = challenges_completed
@@ -270,13 +287,12 @@ def run_data_parser(save_data):
         bool
     )
 
-    # Process normal character completion marks
+    # Process character completion marks
     normal_completions = process_normal_character_marks(
         save_data, normal_unlocks_tierlist_df
     )
     normal_unlocks_tierlist_df["Completed"] = normal_completions
 
-    # Process tainted character completion marks
     tainted_completions = process_tainted_character_marks(
         save_data, tainted_unlocks_tierlist_df
     )
@@ -286,6 +302,5 @@ def run_data_parser(save_data):
     all_df = unify_results(
         challenges_tierlist_df, normal_unlocks_tierlist_df, tainted_unlocks_tierlist_df
     )
-
 
     return all_df
