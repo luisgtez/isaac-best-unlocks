@@ -1,7 +1,7 @@
 import logging
+import subprocess
 from enum import Enum
 
-import subprocess
 import streamlit as st
 from colorlog import ColoredFormatter
 from streamlit_local_storage import LocalStorage
@@ -148,6 +148,7 @@ class App:
     def set_app_mode(self, app_mode: AppMode):
         self.logger.debug(f"Setting APP Mode as: {app_mode} - {app_mode.value}")
         st.session_state["APP_MODE"] = app_mode
+        self.localStorage.setItem("APP_MODE", app_mode.value)
 
     def render_save_file_mode(self):
         uploaded_file = st.file_uploader("Upload your save", type="dat")
@@ -169,7 +170,13 @@ class App:
         )
 
     def initialize_variables(self):
-        self.APP_MODE: AppMode = get_or_set_session_state("APP_MODE", None)
+        mode = self.localStorage.getItem("APP_MODE")
+        if mode == "Save-File":
+            self.APP_MODE: AppMode = AppMode.SAVE_FILE
+        elif mode == "Standalone":
+            self.APP_MODE: AppMode = AppMode.STANDALONE
+        elif mode is None:
+            self.APP_MODE = None
 
     def run_page_config(self):
         # st.set_page_config(layout="wide")
@@ -177,6 +184,7 @@ class App:
 
     def reset_app(self):
         st.session_state["APP_MODE"] = None
+        self.localStorage.deleteItem("APP_MODE")
 
         st.rerun()
 
