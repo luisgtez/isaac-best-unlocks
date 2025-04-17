@@ -42,7 +42,7 @@ st.warning(
 
 uploaded_file = st.file_uploader("Upload your save", type="dat")
 if uploaded_file is not None:
-    if not uploaded_file.name.startswith("rep+"):
+    if "rep+" not in uploaded_file.name:
         st.warning("The save file seems to be from other expansion pack that is not Repentance+, completition marks may not properly be automatically checked.")
     logger.info(f"File uploaded with filename {uploaded_file.name}")
     try:
