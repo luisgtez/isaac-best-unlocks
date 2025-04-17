@@ -45,16 +45,22 @@ This helps you prioritize the best unlocks first.
 
 ## Future Improvements
 
+- Add an explanation on where to find the save file (either if playing with steam cloud or locally).
+- Adding more filters to visual interface (allow multiple column sorting).
+   - Adding filters over which data to show based on if the challenge/character is unlocked or not.
+   - Adding filters to choose between searching only characters, challenges, normal characters or tainted characters.
+- Adding app mode persistence between refreshes.
 - Improving visual interface with characters and items images.
-- Adding more filters to visual interface (allow multiple column sorting)
-   - Adding filters over which data to show based on if the challenge/character is unlocked or not
-   - Adding filters to choose between searching only characters, challenges, normal characters or tainted characters
-- Adding random picker based on what completitions are left
-   - Adding optional weigthed random picker based on quality of completitions left
-- Add file validation
-- Add an explanation on where to find the save file (either if playing with steam cloud or locally)
-- Add "manual" support for users that don't want or can't upload the save file
+- Adding random picker based on what completitions are left.
+   - Adding optional weigthed random picker based on quality of completitions left.
+- Add file validation.
 - Add tier list modifications created by users to change quality of challenges and other unlocks.
+
+## Thecnical Improvements
+
+- Fix standalone first click refresh bug.
+- Refactor into multipage streamlit app.
+
 
 ## Credits
 
