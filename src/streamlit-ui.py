@@ -1,6 +1,7 @@
 import logging
 from enum import Enum
 
+import subprocess
 import streamlit as st
 from colorlog import ColoredFormatter
 from streamlit_local_storage import LocalStorage
@@ -13,9 +14,25 @@ class AppMode(Enum):
     STANDALONE = "Standalone"
 
 
+def get_git_branch():
+    try:
+        return (
+            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+            .decode()
+            .strip()
+        )
+    except Exception:
+        return "unknown"
+
+
 def setup_logger():
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
+    branch = get_git_branch()
+
+    if branch == "dev":
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.DEBUG)
 
     if not logger.handlers:
         handler = logging.StreamHandler()
@@ -31,6 +48,8 @@ def setup_logger():
         )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
+
+    logger.info(f"Logger setup done. Logger level {logger.level}, branch name {branch}")
 
     return logger
 
