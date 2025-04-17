@@ -62,6 +62,7 @@ def lazy_get_or_set_session_state(key, default_value):
 
 def get_or_set_session_state(key, default_value):
     if key not in st.session_state:
+        logger.debug(f"{key} not in st.session_state")
         st.session_state[key] = default_value
     return st.session_state[key]
 
@@ -203,7 +204,7 @@ class App:
         disabled_cols = df.columns.to_list()
         disabled_cols.remove("Completed")
 
-        if self.LOADED_COMPLETIONS is False:
+        if st.session_state["LOADED_COMPLETIONS"] is False:
             self.logger.debug(
                 "LOADED_COMPLETIONS is False. Loading completions from local"
             )
