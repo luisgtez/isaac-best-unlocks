@@ -1,3 +1,4 @@
 pandas==2.2.3
 streamlit==1.44.1
+streamlit-local-storage==0.0.25
 colorlog==6.9.0
