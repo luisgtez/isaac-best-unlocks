@@ -151,7 +151,11 @@ class App:
         self.localStorage.setItem("APP_MODE", app_mode.value)
 
     def render_save_file_mode(self):
+        st.info(
+            "Not sure where your save file is? [Click here for help](https://github.com/luisgtez/isaac-best-unlocks#Where to find the save-file:)"
+        )
         uploaded_file = st.file_uploader("Upload your save", type="dat")
+
         if uploaded_file is not None:
             result = self.process_uploaded_file(uploaded_file)
             if result is not None:
