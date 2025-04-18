@@ -32,7 +32,7 @@ def setup_logger():
     if branch == "dev":
         logger.setLevel(logging.DEBUG)
     else:
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
 
     if not logger.handlers:
         handler = logging.StreamHandler()
