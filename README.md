@@ -75,7 +75,6 @@ Where your save file is stored depends on whether you have Steam Cloud enabled o
 
 ## Future Improvements
 
-- Add an explanation on where to find the save file (either if playing with steam cloud or locally).
 - Adding more filters to visual interface (allow multiple column sorting).
    - Adding filters over which data to show based on if the challenge/character is unlocked or not.
    - Adding filters to choose between searching only characters, challenges, normal characters or tainted characters.
