@@ -157,21 +157,28 @@ class App:
         #     unsafe_allow_html=True,
         # )
 
-        
-
         st.html(
             """
-            <div style="
+            <div 
+                style="
                         background-color: #e1f5fe;
                         padding: 1rem;
                         border-left: 5px solid #2196f3;
                         border-radius: 0.5rem;
                         color: #0d47a1;
                         font-family: sans-serif;
-                    ">
+                    "
+            >
                 💡 Not sure where your save file is?
-                <a href="https://github.com/luisgtez/isaac-best-unlocks/#where-to-find-the-save-file"
-                    style="color: #0d47a1; text-decoration: underline;">Click here for help</a>
+                <a 
+                    href="https://github.com/luisgtez/isaac-best-unlocks/#where-to-find-the-save-file"
+                    target = "_blank";
+                    style="color: #0d47a1;
+                    text-decoration: underline;
+                    "
+                >
+                    Click here for help
+                </a>
             </div>
             """
         )
