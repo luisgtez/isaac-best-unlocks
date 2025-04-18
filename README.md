@@ -64,8 +64,13 @@ Where your save file is stored depends on whether you have Steam Cloud enabled o
 ### If you are not sure you are using steam cloud to save your games
 
 1. Navigate to your steam app library
-2. Right-click on isaac game entry and click ``Properties...``  ![Steam Isaac Propierties](resources/Isaac-propierties.png)
-2. Under `General` you can check wether Steam Cloud is enabled or not.  ![Steam Isaac Propierties](resources/Isaac-steam-cloud.png)
+2. Right-click on isaac game entry and click ``Properties...``  
+
+![Steam Isaac Propierties](resources/Isaac-propierties.png)
+
+2. Under `General` you can check wether Steam Cloud is enabled or not. 
+
+![Steam Isaac Propierties](resources/Isaac-steam-cloud.png)
 
 
 ## Future Improvements
