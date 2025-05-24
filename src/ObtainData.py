@@ -1,5 +1,10 @@
 import numpy as np
 import pandas as pd
+import logging
+
+CHALLENGES_TIERLIST_FILE = "src/data/challenges_data.csv"
+NORMAL_UNLOCKS_TIERLIST_FILE = "src/data/normal_characters_unlocks.csv"
+TAINED_UNLOCKS_TIERLIST_FILE = "src/data/tainted_characters_unlocks.csv"
 
 # Game data constants
 NORMAL_CHARACTERS_INDEX = [
@@ -45,6 +50,8 @@ TAINTED_CHARACTERS_INDEX = ["-"] * len(
 # Mapping to interpret completion values in the save file
 COMPLETION_MAP = {"0": False, "1": False, "3": True}
 
+logger = logging.getLogger(__name__)
+
 
 def get_section_offsets(data):
     """Extract section offsets from the save file structure."""
@@ -67,10 +74,6 @@ def get_section_offsets(data):
 
 def get_int(data, offset, debug=False, num_bytes=2):
     """Extract integer of specified byte length from binary data."""
-    if debug:
-        print(
-            f"current value: {int.from_bytes(data[offset:offset+num_bytes], 'little', signed=False)}"
-        )
     return int.from_bytes(data[offset : offset + num_bytes], "little")
 
 
@@ -245,7 +248,7 @@ def unify_results(challenges_df, normal_df, tainted_df):
     # Concatenate all dataframes
     all_data = np.concat(
         [
-            challenges_df[["Nº", "Name", "Reward", "Item", "Completed"]].values,
+            challenges_df[["Nº", "Name", "Reward", "Item","Type", "Completed"]].values,
             normal_df.values,
             tainted_df.values,
         ],
@@ -254,7 +257,8 @@ def unify_results(challenges_df, normal_df, tainted_df):
 
     # Create unified dataframe with consistent column names
     all_df = pd.DataFrame(
-        all_data, columns=["Nº/Character", "Name/Mark", "Quality", "Item", "Completed"]
+        all_data,
+        columns=["Nº/Character", "Name/Mark", "Quality", "Item", "Type", "Completed"],
     )
 
     # Clean and standardize data types
@@ -268,12 +272,80 @@ def unify_results(challenges_df, normal_df, tainted_df):
     return all_df
 
 
+def getSecrets(data):
+    """
+    Get the status of all secrets/achievements from the save file.
+    Copied from script.py to remove dependency.
+    """
+    secrets_data = []
+    offs = get_section_offsets(data)[0]
+    for i in range(1, 638):
+        secrets_data.append(get_int(data, offs+i, num_bytes=1))
+    return secrets_data
+
+
+def get_unlocked_characters(data):
+    """
+    Returns a list of characters that are unlocked in the save file.
+    
+    Args:
+        data: Binary save file data
+        
+    Returns:
+        list: Names of unlocked characters
+    """
+    # Character unlock achievement IDs
+    character_unlock_secrets = {
+        "Magdalene": 1,
+        "Cain": 2,
+        "Judas": 3,
+        "???": 32,
+        "Eve": 42,
+        "Samson": 67,
+        "Azazel": 79,
+        "Lazarus": 80,
+        "Eden": 81,
+        "The Lost": 82,
+        "Lilith": 199,
+        "Keeper": 251,
+        "Apollyon": 340,
+        "The Forgotten": 390,
+        "Bethany": 404,
+        "Jacob & Esau": 405,
+        # Tainted characters with known IDs
+        "Tainted Cain": 514,
+        "Tainted Forgotten": 513,
+        "Tainted Eden": 516,
+        "Tainted Jacob & Esau": 515
+    }
+    
+    # Isaac is unlocked by default
+    unlocked_characters = ["Isaac"]
+    
+    try:
+        # Get secrets (achievements) using the copied function
+        secrets = getSecrets(data)
+        
+        # Check which characters are unlocked
+        for character, secret_id in character_unlock_secrets.items():
+            # Need to check index-1 since achievements are 1-indexed in the IDs but 0-indexed in the array
+            if secret_id-1 < len(secrets) and secrets[secret_id-1] == 1:
+                unlocked_characters.append(character)
+    except Exception as e:
+        logger.error(f"Error getting unlocked characters: {e}")
+    
+    return unlocked_characters
+
+
 def run_data_parser(save_data):
     """Main function to process save data and return unified results."""
     # File paths
-    challenges_tierlist_file = "src/data/challenges_data.csv"
-    normal_unlocks_tierlist_file = "src/data/normal_characters_unlocks.csv"
-    tainted_unlocks_tierlist_file = "src/data/tainted_characters_unlocks.csv"
+    challenges_tierlist_file = CHALLENGES_TIERLIST_FILE
+    normal_unlocks_tierlist_file = NORMAL_UNLOCKS_TIERLIST_FILE
+    tainted_unlocks_tierlist_file = TAINED_UNLOCKS_TIERLIST_FILE
+    # challenges_tierlist_file = "src/data/challenges_data.csv"
+    # normal_unlocks_tierlist_file = "src/data/normal_characters_unlocks.csv"
+    # tainted_unlocks_tierlist_file = "src/data/tainted_characters_unlocks.csv"
 
     # Load CSV data
     challenges_tierlist_df = pd.read_csv(challenges_tierlist_file)
@@ -286,6 +358,9 @@ def run_data_parser(save_data):
     challenges_tierlist_df["Completed"] = challenges_tierlist_df["Completed"].astype(
         bool
     )
+    challenges_tierlist_df["Type"] = "Challenge"
+    normal_unlocks_tierlist_df["Type"] = "Unlock"
+    tainted_unlocks_tierlist_df["Type"] = "Unlock"
 
     # Process character completion marks
     normal_completions = process_normal_character_marks(
@@ -297,10 +372,28 @@ def run_data_parser(save_data):
         save_data, tainted_unlocks_tierlist_df
     )
     tainted_unlocks_tierlist_df["Completed"] = tainted_completions
-
     # Unify results
     all_df = unify_results(
         challenges_tierlist_df, normal_unlocks_tierlist_df, tainted_unlocks_tierlist_df
     )
-
+    
+    # Get unlocked characters
+    unlocked_characters = get_unlocked_characters(save_data)
+    
+    # Add unlocked status info to the results
+    all_df["Unlocked"] = False
+    
+    # Mark characters as unlocked
+    for character in unlocked_characters:
+        # For normal characters
+        if character in NORMAL_CHARACTERS_INDEX:
+            all_df.loc[all_df["Nº/Character"] == character, "Unlocked"] = True
+        # For tainted characters (they have "Tainted " prefix in the dataframe)
+        elif character.startswith("Tainted ") and character[8:] in NORMAL_CHARACTERS_INDEX:
+            all_df.loc[all_df["Nº/Character"] == character, "Unlocked"] = True
+    
+    # Mark challenges as unlocked - All challenges are unlocked by default in Repentance+
+    # If this is not the case in all versions, we could modify this logic
+    all_df.loc[all_df["Type"] == "Challenge", "Unlocked"] = True
+    
     return all_df
